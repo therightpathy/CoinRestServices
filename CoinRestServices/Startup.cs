@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace CoinRestServices
 {
@@ -24,6 +25,15 @@ namespace CoinRestServices
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
+            services.AddSwaggerGen(
+                (c) => c.SwaggerDoc("v1",
+                    new Info()
+                    {
+                        Title = "Coins API",
+                        Version = "v1.0"
+                    }
+                ));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
@@ -34,6 +44,19 @@ namespace CoinRestServices
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            // setup swagger
+            app.UseSwagger();
+            app.UseSwaggerUI(
+                (c) =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Obligatorisk Coins API v1.0");
+                    c.RoutePrefix = "help";
+                }
+            );
+
+            //Setup CORS
+            app.UseCors(opt => opt.AllowAnyOrigin().AllowAnyHeader().WithMethods("GET", "POST", "PUT", "DELETE")); //all methods
 
             app.UseMvc();
         }
